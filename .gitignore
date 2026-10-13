@@ -7,4 +7,5 @@ project.xcworkspace
 MacKernelSDK
 Lilu.kext
 zlib_compress_fw.pyc
-scripts
+scriptsbuild/
+MacKernelSDK/
