@@ -93,6 +93,8 @@ bool SimpleMtkBtFw::start(IOService *provider)
 
 void SimpleMtkBtFw::publishReg(bool isSucceed, const char *fwName)
 {
+    XYLog("publishReg ok=%d fw=%s\n", isSucceed, fwName ? fwName : "-");
+    m_pDevice->setProperty("MtkBtLog", mtkbt_log_buf());
     m_pDevice->setProperty("FirmwareLoaded", isSucceed);
     if (isSucceed && fwName) {
         OSString *fwNameString = OSString::withCString(fwName);
