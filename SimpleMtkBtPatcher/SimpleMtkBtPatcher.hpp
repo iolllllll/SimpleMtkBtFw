@@ -98,8 +98,10 @@ public:
     static IOReturn newPipeIo(void *that, IOMemoryDescriptor *dataBuffer, uint32_t dataBufferLength, IOUSBHostCompletion *completion, uint32_t completionTimeoutMs);
     mach_vm_address_t oldPipeIo {};
     
+    static void fixReadClock(StandardUSB::DeviceRequest &request, void *data, IOMemoryDescriptor *descriptor);
 private:
     static bool _randomAddressInit;
+    static bool _randomAddressHack;
 };
 
 #endif /* SimpleMtkBtPatcher_h */
