@@ -106,16 +106,14 @@ void SimpleMtkBtFw::publishReg(bool isSucceed, const char *fwName)
     if (version_major >= 21) {
         m_pDevice->setName("Bluetooth USB Host Controller");
         /*
-         * bluetoothd (bm3_usb, "internal controller" mode used by Macs with
-         * built-in Bluetooth SMBIOS) looks for a USB device whose
-         * "USB Product Name" property is "Bluetooth USB Host Controller".
-         * Renaming the registry entry alone is not enough: composite
-         * MediaTek Wi-Fi/BT devices report "Wireless_Device" there, so
-         * bluetoothd never found the controller and its watchdog aborted
-         * it every 30 s.
+         * Leave "USB Product Name" alone: bluetoothd's Found_USB_Dongle()
+         * skips devices whose product name is "Bluetooth USB Host
+         * Controller" (treated as Apple's internal module), and the
+         * internal path assumes a Broadcom chipset and aborts on
+         * MediaTek's reply to BCM VSC 0xFC79. With the NVRAM variables
+         * bluetoothInternalControllerInfo / bluetoothExternalDongleFailed
+         * set, the device is picked up as THIRD_PARTY_DONGLE instead.
          */
-        if (isSucceed)
-            m_pDevice->setProperty("USB Product Name", "Bluetooth USB Host Controller");
     }
 }
 
