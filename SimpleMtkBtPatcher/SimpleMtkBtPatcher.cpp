@@ -123,7 +123,27 @@ void CSimpleMtkBtPatcher::processKext(KernelPatcher &patcher, size_t index, mach
     } else {
         if (SimpleMtkBtPatcher_IOUsbHostInfo.loadIndex == index) {
             SYSLOG(DRV_NAME, "%s", SimpleMtkBtPatcher_IOUsbHostInfo.id);
-            
+
+            KernelPatcher::RouteRequest pipeIoRequest {
+                "__ZN13IOUSBHostPipe2ioEP18IOMemoryDescriptorjP19IOUSBHostCompletionj",
+                newPipeIo,
+                oldPipeIo
+            };
+            patcher.routeMultiple(index, &pipeIoRequest, 1, address, size);
+            if (patcher.getError() == KernelPatcher::Error::NoError) {
+                SYSLOG(DRV_NAME, "routed %s", pipeIoRequest.symbol);
+            } else {
+                SYSLOG(DRV_NAME, "failed to resolve %s, error = %d", pipeIoRequest.symbol, patcher.getError());
+                patcher.clearError();
+            }
+
+            /*
+             * The LE random address workaround below was written for
+             * Intel controllers; keep it opt-in on MediaTek.
+             */
+            if (!checkKernelArgument("-smbtrandaddr"))
+                return;
+
             KernelPatcher::RouteRequest hostDeviceRequest {
             "__ZN15IOUSBHostDevice13deviceRequestEP9IOServiceRN11StandardUSB13DeviceRequestEPvP18IOMemoryDescriptorRjP19IOUSBHostCompletionj",
                 newHostDeviceRequest,
@@ -225,4 +245,44 @@ IOReturn CSimpleMtkBtPatcher::newHostDeviceRequest(void *that, IOService *provid
 #endif
     }
     return FunctionCast(newHostDeviceRequest, callbackMtkBtPatcher->oldHostDeviceRequest)(that, provider, request, data, descriptor, length, completion, timeout);
+}
+
+#pragma mark - Non-flushable ACL for MediaTek
+
+/*
+ * bluetoothd sends A2DP media as "first automatically flushable" ACL
+ * fragments (packet boundary flag 0b10). MediaTek firmware flushes those
+ * when a large L2CAP frame (AAC-ELD to AirPods, ~966 bytes) does not make
+ * it in one baseband packet, so the headphones get broken frames, never
+ * start playback and pause the stream. Linux always sends ACL data as
+ * non-flushable (0b00) to these controllers. Rewrite the flag on HCI ACL
+ * packets going to bulk OUT endpoints.
+ */
+static uint32_t pbRewritten;
+
+IOReturn CSimpleMtkBtPatcher::newPipeIo(void *that, IOMemoryDescriptor *dataBuffer, uint32_t dataBufferLength, IOUSBHostCompletion *completion, uint32_t completionTimeoutMs)
+{
+    IOUSBHostPipe *pipe = static_cast<IOUSBHostPipe *>(that);
+    if (dataBuffer != nullptr && dataBufferLength >= 4 && dataBufferLength <= 1100) {
+        const StandardUSB::EndpointDescriptor *ep = pipe->getEndpointDescriptor();
+        if (ep != nullptr &&
+            (ep->bmAttributes & 0x03) == 0x02 &&        /* bulk */
+            (ep->bEndpointAddress & 0x80) == 0 &&       /* OUT */
+            dataBuffer->prepare(kIODirectionInOut) == kIOReturnSuccess) {
+            uint8_t hdr[4];
+            if (dataBuffer->readBytes(0, hdr, sizeof(hdr)) == sizeof(hdr)) {
+                uint16_t handle = hdr[0] | (hdr[1] << 8);
+                uint16_t len = hdr[2] | (hdr[3] << 8);
+                /* looks like HCI ACL: sane handle, length matches, PB = 0b10 */
+                if ((handle & 0x0fff) < 0x0f00 && len + 4u == dataBufferLength &&
+                    ((handle >> 12) & 3) == 2) {
+                    hdr[1] &= ~0x30;
+                    if (dataBuffer->writeBytes(1, &hdr[1], 1) == 1 && pbRewritten++ < 3)
+                        SYSLOG(DRV_NAME, "ACL PB flushable->non-flushable handle 0x%03x len %u", handle & 0x0fff, len);
+                }
+            }
+            dataBuffer->complete(kIODirectionInOut);
+        }
+    }
+    return FunctionCast(newPipeIo, callbackMtkBtPatcher->oldPipeIo)(that, dataBuffer, dataBufferLength, completion, completionTimeoutMs);
 }
