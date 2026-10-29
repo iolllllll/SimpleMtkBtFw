@@ -52,6 +52,10 @@ jobs:
                 CODE_SIGNING_ALLOWED=NO build
             done
           done
+          # Build patched BlueToolFixup (MediaTek Sequoia & Tahoe)
+          export MKS="$GITHUB_WORKSPACE/MacKernelSDK"
+          export LILU="$GITHUB_WORKSPACE/Lilu.kext"
+          ./BlueToolFixup-MediaTek/build.sh
 
       - name: Package
         env:
@@ -59,15 +63,11 @@ jobs:
         run: |
           V="${{ steps.ver.outputs.version }}"
           LILU_VERSION=1.7.2
-          BRCM_VERSION=2.7.2
           mkdir -p dist deps
-          # Third-party kexts that are needed alongside ours
           curl -fsSL -o deps/lilu.zip "https://github.com/acidanthera/Lilu/releases/download/${LILU_VERSION}/Lilu-${LILU_VERSION}-RELEASE.zip"
-          curl -fsSL -o deps/brcm.zip "https://github.com/acidanthera/BrcmPatchRAM/releases/download/${BRCM_VERSION}/BrcmPatchRAM-${BRCM_VERSION}-RELEASE.zip"
           ditto -x -k deps/lilu.zip deps/lilu
-          ditto -x -k deps/brcm.zip deps/brcm
           LILU="$(find deps/lilu -maxdepth 2 -name Lilu.kext | head -1)"
-          BTF="$(find deps/brcm -maxdepth 2 -name BlueToolFixup.kext | head -1)"
+          BTF="$GITHUB_WORKSPACE/BlueToolFixup-MediaTek/build-work/src/build/Products/Release/BlueToolFixup.kext"
           test -d "$LILU" && test -d "$BTF"
           for CONF in Debug Release; do
             UP="$(echo "$CONF" | tr '[:lower:]' '[:upper:]')"
@@ -78,9 +78,10 @@ jobs:
             (cd "$STAGE" && zip -qry "$GITHUB_WORKSPACE/dist/SimpleMtkBtFw-$V-$UP.zip" .)
             # Everything needed for Bluetooth, ready for EFI/OC/Kexts
             ALL="$(mktemp -d)/SimpleMtkBtFw-$V-$UP-AllInOne"
-            mkdir -p "$ALL/Kexts"
+            mkdir -p "$ALL/Kexts" "$ALL/Firmware"
             cp -R "$LILU" "$BTF" "$P/SimpleMtkBtFw.kext" "$P/SimpleMtkBtPatcher.kext" "$ALL/Kexts/"
-            cp docs/config-snippet.plist docs/INSTALL.txt "$ALL/"
+            cp SimpleMtkBtFw/fw/*.bin "$ALL/Firmware/"
+            cp docs/config-snippet.plist docs/INSTALL.txt docs/INSTALL_RU.md "$ALL/"
             (cd "$(dirname "$ALL")" && zip -qry "$GITHUB_WORKSPACE/dist/SimpleMtkBtFw-$V-$UP-AllInOne.zip" "$(basename "$ALL")")
           done
           (cd dist && shasum -a 256 *.zip > SHA256SUMS.txt)
@@ -98,21 +99,3 @@ jobs:
         with:
           files: dist/*
           generate_release_notes: true
-          body: |
-            **SimpleMtkBtFw ${{ steps.ver.outputs.version }}** — Bluetooth for MediaTek MT7921 / MT7921K (AMD RZ608) / MT7922 on macOS.
-
-            Works: firmware load, pairing, A2DP to speakers and headphones, **AirPods audio (AAC-ELD), controls and switching between Apple devices**, BLE. HFP microphone works but is quiet (CVSD only).
-
-            ### Downloads
-            - **`SimpleMtkBtFw-*-RELEASE-AllInOne.zip`** — everything for Bluetooth in one folder: `Lilu.kext`, `BlueToolFixup.kext` (acidanthera), `SimpleMtkBtFw.kext`, `SimpleMtkBtPatcher.kext`, plus `config-snippet.plist` (Kernel → Add entries in the right order and the NVRAM variables) and `INSTALL.txt`. **Start here.**
-            - `SimpleMtkBtFw-*-RELEASE.zip` — only the two kexts of this project (if you already have Lilu and BlueToolFixup).
-            - `*-DEBUG*.zip` — debug builds (more logging).
-
-            ### Install (OpenCore)
-            1. Copy the kexts to `EFI/OC/Kexts`.
-            2. Add them to `Kernel → Add` in this order: Lilu → BlueToolFixup (MinKernel 21.0.0) → SimpleMtkBtFw → SimpleMtkBtPatcher.
-            3. Add `bluetoothInternalControllerInfo` (14 zero bytes) and `bluetoothExternalDongleFailed` (`00`) to `NVRAM → Add` and `NVRAM → Delete` under `7C436110-AB2A-4BBB-A880-FE41995C9F82`.
-            4. Reboot. If the Bluetooth device is missing, cut power to the PC for 30 s (the M.2 card keeps standby power).
-
-            Details and troubleshooting: see the [README](https://github.com/flxxxxddd/SimpleMtkBtFw#readme).
-            Wi-Fi for the same card: **[SimpleMtkWlan](https://github.com/flxxxxddd/SimpleMtkWlan)**.

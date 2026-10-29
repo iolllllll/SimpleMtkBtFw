@@ -31,6 +31,8 @@ project.xcworkspace/
 # Kext build artifacts & SDK
 Lilu.kext
 build-work/
+dist/
+deps/
 BlueToolFixup-MediaTek/src/
 BlueToolFixup-MediaTek/build-work/
 BlueToolFixup-MediaTek/build/

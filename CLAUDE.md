@@ -7,12 +7,11 @@ for macOS (firmware loader + Lilu patcher / BlueToolFixup table patcher). Wi-Fi 
 ## Build
 
 ```sh
-./scripts/bootstrap.sh     # MacKernelSDK submodule + Lilu SDK (Lilu.kext, gitignored)
-for s in SimpleMtkBtFw SimpleMtkBtPatcher; do
-  xcodebuild -project SimpleMtkBtFw.xcodeproj -scheme $s -configuration Debug \
-    -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
-done
-kmutil libraries -p build/Build/Products/Debug/SimpleMtkBtPatcher.kext --undef-symbols
+# All-in-one build (SimpleMtkBtFw, SimpleMtkBtPatcher, and patched BlueToolFixup):
+./build.sh
+
+# Or build + auto-install to mounted EFI and /etc/bluetool:
+./build.sh --install
 ```
 
 - `MODULE_VERSION` must stay purely numeric; CI derives it from `vX.Y.Z` tags.
@@ -21,6 +20,7 @@ kmutil libraries -p build/Build/Products/Debug/SimpleMtkBtPatcher.kext --undef-s
 
 ## Layout
 
+- `build.sh`: Master build and installation script.
 - `SimpleMtkBtFw/BtMtk.cpp`: MediaTek setup (chip id, WMT patch download per
   section, `FUNC_CTRL` enable, subsystem reset). Supports `0x7961`, `0x7922`, and `0x7925`.
 - `SimpleMtkBtFw/SimpleMtkBtFw.cpp`: IOService on the USB device, publishes

@@ -121,16 +121,25 @@ For older macOS versions or setups using the generic fallback driver:
 
 Requirements: macOS with Xcode.
 
+Build all kexts and prepare firmware in a single command:
+
 ```sh
-git clone --recurse-submodules https://github.com/flxxxxddd/SimpleMtkBtFw.git
+git clone --recurse-submodules https://github.com/iolllllll/SimpleMtkBtFw.git
 cd SimpleMtkBtFw
-./scripts/bootstrap.sh          # MacKernelSDK submodule + Lilu SDK
-for s in SimpleMtkBtFw SimpleMtkBtPatcher; do
-  xcodebuild -project SimpleMtkBtFw.xcodeproj -scheme $s \
-    -configuration Release -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
-done
-# -> build/Build/Products/Release/{SimpleMtkBtFw,SimpleMtkBtPatcher}.kext
+./build.sh
 ```
+
+This automatically:
+1. Bootstraps MacKernelSDK and Lilu SDK headers.
+2. Compiles `SimpleMtkBtFw.kext` and `SimpleMtkBtPatcher.kext`.
+3. Compiles patched `BlueToolFixup.kext` (macOS 15 Sequoia & 26 Tahoe MediaTek whitelist).
+4. Packages all kexts and firmware into `dist/`.
+
+**One-step build & install on your Hackintosh:**
+```sh
+./build.sh --install
+```
+This builds everything, copies `SimpleMtkBtFw.kext` and `BlueToolFixup.kext` directly to your mounted `EFI/OC/Kexts`, and installs the firmware to `/etc/bluetool`.
 
 `SimpleMtkBtFw/FwBinary.cpp` is regenerated from `SimpleMtkBtFw/fw/*.bin` by
 `scripts/zlib_compress_fw.py` during the build.
@@ -145,6 +154,8 @@ CI builds Debug and Release on every push and pull request; pushing a tag
   device table via `BlueToolFixup-MediaTek`.
 * **MT7925 Wi-Fi 7 chipset support.** Added `BT_RAM_CODE_MT7925_1_1_hdr.bin`,
   internal chip ID `0x7925`, and Foxconn PID `0xE14F`.
+* **One-command build & install script (`./build.sh`).** Compiles all kexts
+  including the patched BlueToolFixup and can install directly to EFI and `/etc/bluetool`.
 * **`bluetoothd` finds and accepts the controller.** On SMBIOS models with
   built-in Bluetooth, `bluetoothd` looked for Apple's internal module, did not
   find it and looped until its watchdog killed it. With the NVRAM variables above
