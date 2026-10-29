@@ -46,7 +46,7 @@ done
 echo "==> Step 3/4: Building patched BlueToolFixup (MediaTek native driver patch)..."
 export MKS="$HERE/MacKernelSDK"
 export LILU="$HERE/Lilu.kext"
-"$HERE/BlueToolFixup-MediaTek/build.sh" > /dev/null
+bash "$HERE/BlueToolFixup-MediaTek/build.sh" > /dev/null
 
 # 4. Assemble output into dist/
 echo "==> Step 4/4: Packaging artifacts into dist/..."

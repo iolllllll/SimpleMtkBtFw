@@ -55,7 +55,7 @@ jobs:
           # Build patched BlueToolFixup (MediaTek Sequoia & Tahoe)
           export MKS="$GITHUB_WORKSPACE/MacKernelSDK"
           export LILU="$GITHUB_WORKSPACE/Lilu.kext"
-          ./BlueToolFixup-MediaTek/build.sh
+          bash ./BlueToolFixup-MediaTek/build.sh
 
       - name: Package
         env:
