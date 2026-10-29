@@ -5,7 +5,7 @@
 
 [中文说明](README_CN.md) (upstream, not updated for this fork)
 
-**Bluetooth for MediaTek MT7921 / MT7921K (AMD RZ608) / MT7922 on macOS.**
+**Bluetooth for MediaTek MT7921 / MT7921K (AMD RZ608) / MT7922 / MT7925 on macOS.**
 
 Two kexts:
 
@@ -40,11 +40,11 @@ iMacPro1,1, Intel desktop.
 | Sleep / wake | ⚠️ untested |
 
 Supported USB IDs: see [`SimpleMtkBtFw/Info.plist`](SimpleMtkBtFw/Info.plist)
-(MT7921, MT7922, MT7922A and a generic MediaTek Bluetooth class match). The
-firmware path accepts the internal chip IDs `0x7961` (MT7921) and `0x7922`.
+(MT7921, MT7922, MT7922A, MT7925 and a generic MediaTek Bluetooth class match). The
+firmware path accepts the internal chip IDs `0x7961` (MT7921), `0x7922`, and `0x7925`.
 
 Embedded firmware: `BT_RAM_CODE_MT7961_1_2_hdr.bin`,
-`BT_RAM_CODE_MT7961_1a_2_hdr.bin`, `BT_RAM_CODE_MT7922_1_1_hdr.bin`.
+`BT_RAM_CODE_MT7961_1a_2_hdr.bin`, `BT_RAM_CODE_MT7922_1_1_hdr.bin`, `BT_RAM_CODE_MT7925_1_1_hdr.bin`.
 
 ## Installation (OpenCore)
 

@@ -85,7 +85,7 @@ def process_files(target_file, dir):
     if not os.path.exists(target_file):
         if not os.path.exists(os.path.dirname(target_file)):
             os.mkdirs(os.path.dirname(target_file))
-    target_file_handle = open(target_file, "w")
+    target_file_handle = open(target_file, "w", encoding="utf-8")
     target_file_handle.write(copyright)
     for root, dirs, files in os.walk(dir):
         file_hash=[]

@@ -26,6 +26,7 @@
 /* Begin PBXFileReference section */
 		50E7FCC02525921B009AC958 /* libkmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libkmod.a; path = MacKernelSDK/Library/x86_64/libkmod.a; sourceTree = "<group>"; };
 		BBF2E8D02FC9FE9A0000F940 /* BT_RAM_CODE_MT7922_1_1_hdr.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = BT_RAM_CODE_MT7922_1_1_hdr.bin; sourceTree = "<group>"; };
+		BBF2E8D32FC9FE9A0000F940 /* BT_RAM_CODE_MT7925_1_1_hdr.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = BT_RAM_CODE_MT7925_1_1_hdr.bin; sourceTree = "<group>"; };
 		BBF2E8D12FC9FE9A0000F940 /* BT_RAM_CODE_MT7961_1_2_hdr.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = BT_RAM_CODE_MT7961_1_2_hdr.bin; sourceTree = "<group>"; };
 		BBF2E8D22FC9FE9A0000F940 /* BT_RAM_CODE_MT7961_1a_2_hdr.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = BT_RAM_CODE_MT7961_1a_2_hdr.bin; sourceTree = "<group>"; };
 		BBF2E8D32FC9FF2D0000F940 /* FwBinary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FwBinary.cpp; sourceTree = "<group>"; };
@@ -132,6 +133,7 @@
 			isa = PBXGroup;
 			children = (
 				BBF2E8D02FC9FE9A0000F940 /* BT_RAM_CODE_MT7922_1_1_hdr.bin */,
+				BBF2E8D32FC9FE9A0000F940 /* BT_RAM_CODE_MT7925_1_1_hdr.bin */,
 				BBF2E8D12FC9FE9A0000F940 /* BT_RAM_CODE_MT7961_1_2_hdr.bin */,
 				BBF2E8D22FC9FE9A0000F940 /* BT_RAM_CODE_MT7961_1a_2_hdr.bin */,
 			);

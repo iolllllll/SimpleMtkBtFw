@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for working on SimpleMtkBtFw: MediaTek MT7921 / MT7922 USB Bluetooth
+Guidance for working on SimpleMtkBtFw: MediaTek MT7921 / MT7922 / MT7925 USB Bluetooth
 for macOS (firmware loader + Lilu patcher). Wi-Fi for the same card lives in
 [SimpleMtkWlan](https://github.com/flxxxxddd/SimpleMtkWlan).
 

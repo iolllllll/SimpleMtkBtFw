@@ -99,6 +99,7 @@ bool BtMtk::setupUsb()
 
     switch (devId) {
         case 0x7922:
+        case 0x7925:
         case 0x7961:
             if (!buildFirmwareName(fwname, sizeof(fwname), devId, fwVersion, fwFlavor)) {
                 return false;
@@ -113,6 +114,9 @@ bool BtMtk::setupUsb()
             }
             if (!enableBluetoothProtocol(true)) {
                 XYLog("Failed to enable Bluetooth protocol\n");
+                if (devId == 0x7925) {
+                    subsystemReset(devId);
+                }
                 return false;
             }
             strncpy(m_loadedFirmwareName, fwname, sizeof(m_loadedFirmwareName) - 1);
@@ -488,6 +492,45 @@ bool BtMtk::subsystemReset(u32 devId)
         }
         value |= BIT(0);
         if (!uhwRegWrite(MTK_BT_SUBSYS_RST, value)) {
+            return false;
+        }
+        IOSleep(100);
+    } else if (devId == 0x7925) {
+        if (!uhwRegRead(MTK_BT_RESET_REG_CONNV3, &value)) {
+            return false;
+        }
+        value |= (1 << 5);
+        if (!uhwRegWrite(MTK_BT_RESET_REG_CONNV3, value)) {
+            return false;
+        }
+        if (!uhwRegRead(MTK_BT_RESET_REG_CONNV3, &value)) {
+            return false;
+        }
+        value &= 0xFFFF00FF;
+        value |= (1 << 13);
+        if (!uhwRegWrite(MTK_BT_RESET_REG_CONNV3, value)) {
+            return false;
+        }
+        if (!uhwRegWrite(MTK_EP_RST_OPT, 0x00010001)) {
+            return false;
+        }
+        if (!uhwRegRead(MTK_BT_RESET_REG_CONNV3, &value)) {
+            return false;
+        }
+        value |= (1 << 0);
+        if (!uhwRegWrite(MTK_BT_RESET_REG_CONNV3, value)) {
+            return false;
+        }
+        if (!uhwRegWrite(MTK_UDMA_INT_STA_BT, 0x000000FF)) {
+            return false;
+        }
+        if (!uhwRegRead(MTK_UDMA_INT_STA_BT, &value)) {
+            return false;
+        }
+        if (!uhwRegWrite(MTK_UDMA_INT_STA_BT1, 0x000000FF)) {
+            return false;
+        }
+        if (!uhwRegRead(MTK_UDMA_INT_STA_BT1, &value)) {
             return false;
         }
         IOSleep(100);
