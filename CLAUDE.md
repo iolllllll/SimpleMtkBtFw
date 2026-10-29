@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Guidance for working on SimpleMtkBtFw: MediaTek MT7921 / MT7922 / MT7925 USB Bluetooth
-for macOS (firmware loader + Lilu patcher). Wi-Fi for the same card lives in
+for macOS (firmware loader + Lilu patcher / BlueToolFixup table patcher). Wi-Fi for the same card lives in
 [SimpleMtkWlan](https://github.com/flxxxxddd/SimpleMtkWlan).
 
 ## Build
@@ -22,34 +22,42 @@ kmutil libraries -p build/Build/Products/Debug/SimpleMtkBtPatcher.kext --undef-s
 ## Layout
 
 - `SimpleMtkBtFw/BtMtk.cpp`: MediaTek setup (chip id, WMT patch download per
-  section, `FUNC_CTRL` enable, subsystem reset). Mirrors Linux `btmtk.c`.
+  section, `FUNC_CTRL` enable, subsystem reset). Supports `0x7961`, `0x7922`, and `0x7925`.
 - `SimpleMtkBtFw/SimpleMtkBtFw.cpp`: IOService on the USB device, publishes
   `FirmwareLoaded`, `fw_name`, `MtkBtLog`.
 - `SimpleMtkBtFw/Log.h`: `XYLog` → IOLog + ring buffer (`mtkbt_log`).
 - `SimpleMtkBtPatcher/`: Lilu plugin; routes `IOUSBHostDevice::deviceRequest`
-  (HCI commands on EP0) and `IOUSBHostPipe::io` (bulk ACL OUT).
+  (HCI commands on EP0) and `IOUSBHostPipe::io` (bulk ACL OUT) for generic dongle mode.
+- `BlueToolFixup-MediaTek/`: Lilu plugin modification for `BlueToolFixup` that
+  patches macOS 15 Sequoia (`Found_USB_Dongle`) and macOS 26 Tahoe (7-entry device table)
+  whitelist in `bluetoothd` on the fly to enable native `USB SRS` mode.
 
 ## How macOS uses the controller (do not regress)
 
 - `bluetoothd` (bm3_usb) talks to the USB device directly from user space; the
   kernel only loads firmware. HCI commands = EP0 class requests, events =
   interrupt IN, ACL = bulk, SCO = isochronous interface 1.
+- In macOS 15+ and macOS 26+, `bluetoothd` features a native MediaTek driver (`USB SRS`,
+  `Chipset: SRS_7922`). It requires `BlueToolFixup-MediaTek` to accept non-Apple PIDs
+  (e.g., `0489:E14F` for MT7925 or `0489:E0CD` for MT7921) and a firmware file placed in
+  `/etc/bluetool/BT_RAM_CODE_MT7922_1_1_hdr.bin`.
+- In Tahoe 26.x, `bluetoothd` whitelist is a 7-entry 28-byte device table:
+  `0489:E0D8`, `0489:E0E0`, `0489:E0F1`, `0489:E0F2`, `0489:E0F6`, `0E8D:7922`, `13D3:3568`.
 - Leave the USB "Product Name" alone. `Found_USB_Dongle()` skips devices named
   "Bluetooth USB Host Controller" (Apple's internal module), the internal path
   assumes Broadcom (`BCM_4350C2`) and aborts on MediaTek's reply to VSC
   `0xFC79` (`bcm_vsc.c:1125`).
-- The third-party dongle path (`THIRD_PARTY_DONGLE`) needs NVRAM
+- The third-party dongle path (`THIRD_PARTY_DONGLE` / `USB SRS`) needs NVRAM
   `bluetoothInternalControllerInfo` (14 bytes) and
-  `bluetoothExternalDongleFailed` (`00`); without them `bluetoothd` falls back
-  to the internal/Broadcom path.
+  `bluetoothExternalDongleFailed` (`00`) under both Add and Delete; without them
+  `bluetoothd` falls back to the internal/Broadcom path.
 - `HCI_Read_Clock(handle, 0)`: MediaTek returns handle 0 and `bluetoothd`
   cannot match it; AAC-ELD to AirPods then never plays. The patcher sends
   `Which_Clock = 1`. Counters: `IOResources` → `SimpleMtkBtPatcher`.
-- `com.apple.MobileBluetooth.debug` → `A2DP.DisableAACELD` and
-  `FastConnect.Disable*` have no effect on AirPods (fast connect still picks
-  AAC-ELD); do not rely on them.
+- Samsung 970 EVO Plus / NVMe APFS slow boot: Set `Kernel -> Quirks -> SetApfsTrimTimeout = 0`
+  to eliminate the 40–90 second delay on `spaceman_trim_free_blocks`.
 - After a wedged session the Bluetooth core may not enumerate on the next
-  boot; only a real power cut fixes it.
+  boot; only a real power cut (10–15 s) fixes it due to AM4/AM5 +5VSB standby power.
 - Repeated `bluetoothd` crashes make launchd throttle it (640–1200 s).
 
 ## Debugging
@@ -63,5 +71,5 @@ kmutil libraries -p build/Build/Products/Debug/SimpleMtkBtPatcher.kext --undef-s
 
 ## Known issues
 
-- HFP microphone: CVSD only, quiet and choppy (likely isochronous SCO data
-  loss); mSBC not offered.
+- HFP microphone: CVSD only (narrow-band 8 kHz phone call quality) due to macOS
+  restricting wide-band mSBC to Apple/Broadcom chipsets; recommend selecting internal/USB mic.

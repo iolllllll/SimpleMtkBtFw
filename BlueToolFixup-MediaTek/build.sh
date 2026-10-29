@@ -4,8 +4,20 @@
 #   MKS=/path/to/MacKernelSDK LILU=/path/to/Lilu.kext ./build.sh
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-MKS="${MKS:?set MKS to a MacKernelSDK directory}"
-LILU="${LILU:?set LILU to a Lilu.kext (DEBUG build, contains Contents/Resources/Headers)}"
+ROOT="$(cd "$HERE/.." && pwd)"
+
+MKS="${MKS:-$ROOT/MacKernelSDK}"
+LILU="${LILU:-$ROOT/Lilu.kext}"
+
+if [ ! -d "$MKS" ]; then
+    echo "ERROR: MacKernelSDK not found at $MKS. Set MKS=/path/to/MacKernelSDK" >&2
+    exit 1
+fi
+if [ ! -d "$LILU" ]; then
+    echo "ERROR: Lilu.kext not found at $LILU. Set LILU=/path/to/Lilu.kext" >&2
+    exit 1
+fi
+
 WORK="${WORK:-$HERE/build-work}"
 UPSTREAM_COMMIT=65389020769837e92e9fb939bac34bd9a3e25bb2
 

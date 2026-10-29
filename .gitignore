@@ -1,10 +1,12 @@
 .DS_Store
 DerivedData
 build
+build-work
 xcuserdata
 xcshareddata
 project.xcworkspace
 Lilu.kext
 zlib_compress_fw.pyc
-Lilu.kext
 scripts/__pycache__/
+BlueToolFixup-MediaTek/src/
+BlueToolFixup-MediaTek/build-work/

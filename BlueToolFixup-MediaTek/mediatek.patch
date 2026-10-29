@@ -1,8 +1,8 @@
 diff --git a/BrcmPatchRAM/BlueToolFixup.cpp b/BrcmPatchRAM/BlueToolFixup.cpp
-index e592e66..a7d859c 100644
+index e592e66..60a0eec 100644
 --- a/BrcmPatchRAM/BlueToolFixup.cpp
 +++ b/BrcmPatchRAM/BlueToolFixup.cpp
-@@ -161,6 +161,32 @@ static const uint8_t kBadChipsetCheckPatched15_4[] =
+@@ -161,6 +161,39 @@ static const uint8_t kBadChipsetCheckPatched15_4[] =
      0x90, 0x90
  };
  
@@ -18,6 +18,13 @@ index e592e66..a7d859c 100644
 +static const uint8_t kMtkCmpwOriginal[] = { 0x66, 0x81, 0x7F, 0x16, 0xD8, 0xE0 };
 +static uint8_t       kMtkCmpwPatched[]  = { 0x66, 0x81, 0x7F, 0x16, 0xCD, 0xE0 };
 +static bool shouldPatchMtk = true;
++
++// --- MediaTek native path of bluetoothd (macOS Tahoe 26.x x86_64 / arm64) ----------------------------------
++// In Tahoe, bluetoothd uses a 7-entry table:
++//   0489:E0D8, 0489:E0E0, 0489:E0F1, 0489:E0F2, 0489:E0F6, 0E8D:7922, 13D3:3568
++// We replace the first entry (0489:E0D8) with the target PID (default 0xE14F, Foxconn MT7925; override with smbtpid=<n>).
++static const uint8_t kMtkTahoeTableOriginal[] = { 0x89, 0x04, 0xD8, 0xE0, 0x89, 0x04, 0xE0, 0xE0 };
++static uint8_t       kMtkTahoeTablePatched[]  = { 0x89, 0x04, 0x4F, 0xE1, 0x89, 0x04, 0xE0, 0xE0 };
 +
 +// bluetoothd's mtkFWPatchUsingUsingCmd() (VA 0x1000ce5ab on 24H32) sends ROM-patch data in WMT chunks of
 +// 0x7BA (1978) bytes. The MT7921 ROM accepts the first command (section map, 61 bytes) but stalls the control
@@ -35,13 +42,14 @@ index e592e66..a7d859c 100644
  static bool shouldPatchBoardId = false;
  static bool shouldPatchAddress = false;
  static bool shouldPatchNvramCheck = false;
-@@ -236,6 +262,15 @@ static void patched_cs_validate_page(vnode_t vp, memory_object_t pager, memory_o
+@@ -236,6 +269,16 @@ static void patched_cs_validate_page(vnode_t vp, memory_object_t pager, memory_o
                  searchAndPatch(data, PAGE_SIZE, path, boardIdsWithUSBBluetooth[0], kBoardIdSize, BaseDeviceInfo::get().boardIdentifier, kBoardIdSize);
              if (shouldPatchAddress)
                  searchAndPatchWithMask(data, PAGE_SIZE, path, kSkipAddressCheckOriginal, kSkipAddressCheckMask, kSkipAddressCheckPatched, kSkipAddressCheckMask);
 +            if (shouldPatchMtk) {
 +                searchAndPatch(data, PAGE_SIZE, path, kMtkXorOriginal, sizeof(kMtkXorOriginal), kMtkXorPatched, sizeof(kMtkXorPatched));
 +                searchAndPatch(data, PAGE_SIZE, path, kMtkCmpwOriginal, sizeof(kMtkCmpwOriginal), kMtkCmpwPatched, sizeof(kMtkCmpwPatched));
++                searchAndPatch(data, PAGE_SIZE, path, kMtkTahoeTableOriginal, sizeof(kMtkTahoeTableOriginal), kMtkTahoeTablePatched, sizeof(kMtkTahoeTablePatched));
 +            }
 +            if (shouldPatchMtkChunk) {
 +                searchAndPatch(data, PAGE_SIZE, path, kMtkChunk1Original, sizeof(kMtkChunk1Original), kMtkChunk1Patched, sizeof(kMtkChunk1Patched));
@@ -51,7 +59,7 @@ index e592e66..a7d859c 100644
          }
      }
  }
-@@ -267,6 +302,19 @@ static void pluginStart() {
+@@ -267,6 +310,21 @@ static void pluginStart() {
              shouldPatchAddress = checkKernelArgument("-btlfxallowanyaddr");
          if (getKernelVersion() <= KernelVersion::Sonoma)
              shouldPatchNvramCheck = checkKernelArgument("-btlfxnvramcheck");
@@ -63,11 +71,13 @@ index e592e66..a7d859c 100644
 +        kMtkChunk1Patched[1] = static_cast<uint8_t>(mtkChunk & 0xFF); kMtkChunk1Patched[2] = static_cast<uint8_t>((mtkChunk >> 8) & 0xFF);
 +        kMtkChunk2Patched[2] = static_cast<uint8_t>(mtkChunk & 0xFF); kMtkChunk2Patched[3] = static_cast<uint8_t>((mtkChunk >> 8) & 0xFF);
 +        kMtkChunk3Patched[2] = static_cast<uint8_t>(mtkChunk & 0xFF); kMtkChunk3Patched[3] = static_cast<uint8_t>((mtkChunk >> 8) & 0xFF);
-+        uint32_t mtkPid = 0;
++        uint32_t mtkPid = 0xE14F;
 +        if (lilu_get_boot_args("smbtpid", &mtkPid, sizeof(mtkPid)) && mtkPid > 0 && mtkPid <= 0xFFFF) {
 +            kMtkXorPatched[2]  = kMtkCmpwPatched[4] = static_cast<uint8_t>(mtkPid & 0xFF);
 +            kMtkXorPatched[3]  = kMtkCmpwPatched[5] = static_cast<uint8_t>((mtkPid >> 8) & 0xFF);
 +        }
++        kMtkTahoeTablePatched[2] = static_cast<uint8_t>(mtkPid & 0xFF);
++        kMtkTahoeTablePatched[3] = static_cast<uint8_t>((mtkPid >> 8) & 0xFF);
          KernelPatcher::RouteRequest csRoute = KernelPatcher::RouteRequest("_cs_validate_page", patched_cs_validate_page, orig_cs_validate);
          if (!patcher.routeMultipleLong(KernelPatcher::KernelID, &csRoute, 1))
              SYSLOG(MODULE_SHORT, "failed to route cs validation pages");
