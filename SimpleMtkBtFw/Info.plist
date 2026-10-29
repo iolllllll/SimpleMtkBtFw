@@ -20,27 +20,6 @@
 	<string>$(MODULE_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>SimpleMtkBtFw_MediaTek_Generic</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SimpleMtkBtFw</string>
-			<key>IOMatchCategory</key>
-			<string>SimpleMtkBtFw</string>
-			<key>IOProbeScore</key>
-			<integer>4000</integer>
-			<key>IOProviderClass</key>
-			<string>IOUSBHostDevice</string>
-			<key>bDeviceClass</key>
-			<integer>224</integer>
-			<key>bDeviceProtocol</key>
-			<integer>1</integer>
-			<key>bDeviceSubClass</key>
-			<integer>1</integer>
-			<key>idVendor</key>
-			<integer>3725</integer>
-		</dict>
 		<key>SimpleMtkBtFw_MT7921_0489_e0c8</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -259,40 +238,6 @@
 			<string>IOUSBHostDevice</string>
 			<key>idProduct</key>
 			<integer>13830</integer>
-			<key>idVendor</key>
-			<integer>5075</integer>
-		</dict>
-		<key>SimpleMtkBtFw_MT7922_13d3_3585</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SimpleMtkBtFw</string>
-			<key>IOMatchCategory</key>
-			<string>SimpleMtkBtFw</string>
-			<key>IOProbeScore</key>
-			<integer>4000</integer>
-			<key>IOProviderClass</key>
-			<string>IOUSBHostDevice</string>
-			<key>idProduct</key>
-			<integer>13701</integer>
-			<key>idVendor</key>
-			<integer>5075</integer>
-		</dict>
-		<key>SimpleMtkBtFw_MT7922_13d3_3610</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>SimpleMtkBtFw</string>
-			<key>IOMatchCategory</key>
-			<string>SimpleMtkBtFw</string>
-			<key>IOProbeScore</key>
-			<integer>4000</integer>
-			<key>IOProviderClass</key>
-			<string>IOUSBHostDevice</string>
-			<key>idProduct</key>
-			<integer>13840</integer>
 			<key>idVendor</key>
 			<integer>5075</integer>
 		</dict>
@@ -721,20 +666,40 @@
 			<key>idVendor</key>
 			<integer>13813</integer>
 		</dict>
-	</dict>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2019 zxystd. Copyright © 2021 MediaTek Inc. Copyright © 2026 laobamac. All rights reserved.</string>
-	<key>OSBundleLibraries</key>
-	<dict>
-		<key>com.apple.iokit.IOUSBHostFamily</key>
-		<string>1.2</string>
-		<key>com.apple.kpi.iokit</key>
-		<string>16.7</string>
-		<key>com.apple.kpi.libkern</key>
-		<string>16.7</string>
-		<key>com.apple.kpi.mach</key>
-		<string>16.7</string>
-
+		<key>SimpleMtkBtFw_MT7922_13d3_3585</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SimpleMtkBtFw</string>
+			<key>IOMatchCategory</key>
+			<string>SimpleMtkBtFw</string>
+			<key>IOProbeScore</key>
+			<integer>4000</integer>
+			<key>IOProviderClass</key>
+			<string>IOUSBHostDevice</string>
+			<key>idProduct</key>
+			<integer>13701</integer>
+			<key>idVendor</key>
+			<integer>5075</integer>
+		</dict>
+		<key>SimpleMtkBtFw_MT7922_13d3_3610</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SimpleMtkBtFw</string>
+			<key>IOMatchCategory</key>
+			<string>SimpleMtkBtFw</string>
+			<key>IOProbeScore</key>
+			<integer>4000</integer>
+			<key>IOProviderClass</key>
+			<string>IOUSBHostDevice</string>
+			<key>idProduct</key>
+			<integer>13840</integer>
+			<key>idVendor</key>
+			<integer>5075</integer>
+		</dict>
 		<key>SimpleMtkBtFw_MT7925_0489_e0fa</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -1228,6 +1193,40 @@
 			<key>idVendor</key>
 			<integer>11388</integer>
 		</dict>
+		<key>SimpleMtkBtFw_MediaTek_Generic</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>SimpleMtkBtFw</string>
+			<key>IOMatchCategory</key>
+			<string>SimpleMtkBtFw</string>
+			<key>IOProbeScore</key>
+			<integer>4000</integer>
+			<key>IOProviderClass</key>
+			<string>IOUSBHostDevice</string>
+			<key>bDeviceClass</key>
+			<integer>224</integer>
+			<key>bDeviceProtocol</key>
+			<integer>1</integer>
+			<key>bDeviceSubClass</key>
+			<integer>1</integer>
+			<key>idVendor</key>
+			<integer>3725</integer>
+		</dict>
+	</dict>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2019 zxystd. Copyright © 2021 MediaTek Inc. Copyright © 2026 laobamac. All rights reserved.</string>
+	<key>OSBundleLibraries</key>
+	<dict>
+		<key>com.apple.iokit.IOUSBHostFamily</key>
+		<string>1.2</string>
+		<key>com.apple.kpi.iokit</key>
+		<string>16.7</string>
+		<key>com.apple.kpi.libkern</key>
+		<string>16.7</string>
+		<key>com.apple.kpi.mach</key>
+		<string>16.7</string>
 	</dict>
 </dict>
 </plist>
