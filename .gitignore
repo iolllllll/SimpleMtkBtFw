@@ -1,12 +1,64 @@
+# macOS
 .DS_Store
-DerivedData
-build
-build-work
-xcuserdata
-xcshareddata
-project.xcworkspace
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Xcode & Apple Dev
+build/
+DerivedData/
+*.build/
+*.mode1v3
+*.mode2v3
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+xcuserdata/
+xcshareddata/WorkspaceSettings.xcsettings
+project.xcworkspace/
+*.xcscmblueprint
+*.xccheckout
+*.xcactivitylog
+
+# Kext build artifacts & SDK
 Lilu.kext
-zlib_compress_fw.pyc
-scripts/__pycache__/
+build-work/
 BlueToolFixup-MediaTek/src/
 BlueToolFixup-MediaTek/build-work/
+BlueToolFixup-MediaTek/build/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+zlib_compress_fw.pyc
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Diagnostics, logs & traces
+*.log
+*.pklg
+*.ioreg
+*.dmp
+bluetooth-diagnostic*
+ioreg-dump*
+
+# Temp & Scratch
+tmp/
+temp/
+scratch/
