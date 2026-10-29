@@ -173,3 +173,10 @@ CI builds Debug and Release on every push and pull request; pushing a tag
 See the individual source file headers and the included license files. Files
 adapted from upstream keep their original copyright and SPDX headers.
 Firmware is redistributed under the MediaTek firmware license.
+
+
+## Guides & Documentation
+
+- **[Installation Guide in Russian / Руководство на русском](docs/INSTALL_RU.md)**: Полная пошаговая инструкция по установке, настройке OpenCore, USB-маппингу и диагностике.
+- **[Native macOS 15 Sequoia MediaTek Driver (SRS Transport)](docs/MT7921-Sequoia.md)**: Подробный анализ нативного пути `bluetoothd` в Sequoia и использование патча `BlueToolFixup-MediaTek`.
+- **[BlueToolFixup-MediaTek](BlueToolFixup-MediaTek/README.md)**: Патч для снятия хардкодного ограничения PID `0xE0D8` в macOS 15 `bluetoothd` через boot-arg `smbtpid=0xXXXX`.
